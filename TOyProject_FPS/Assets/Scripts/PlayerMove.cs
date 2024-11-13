@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.PackageManager;
 using UnityEngine;
 
 // 스페이스바를 누르면 점프를 하고 싶다.
@@ -24,12 +25,85 @@ public class PlayerMove : MonoBehaviour
     // 현재 점프 횟수
     int jumpCurrCnt;
 
+    // 마우스 우클릭해서 움직일수 있는 상태니?
+    bool canMove = false;
+
+    // 움직이여야 하는 방향
+    Vector3 movDir;
+
+    // 움직이여야 하는 거리
+    float moveDist;
+
     void Start()
     {
         // 캐릭터 컨트롤러  가져오자
         cc = GetComponent<CharacterController>();
     }
     void Update()
+    {
+
+
+
+         WASD_Move();
+
+
+        
+
+
+        /*
+        Click_Move();
+
+        if (canMove)
+        {
+            // 움직일 수 있는 거리를 줄여나가자( 거리  =  속력 * 시간)
+            moveDist -= moveSpeed * Time.deltaTime;    
+
+            // 만약에 moveDist가 0보다 같거나 작으면
+            if(moveDist <= 0)
+            {
+                // 움직이지 않게 하자.
+                canMove = false;
+            }
+
+            // dir 방향으로 움직이자
+            cc.Move(movDir * moveSpeed * Time.deltaTime);
+        }
+
+        */
+    }
+
+    void Click_Move()
+    {
+
+        // 마우스 오른쪽 버튼을 누르지 않았다면 함수를 나가자.
+        if (Input.GetMouseButtonDown(1) == false) return;
+
+        // 화면 좌표에서 Ray르  만들자.
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        //  Raycast를 이용해서 부딪힌 정보를 얻어오자.
+        RaycastHit hitInfo;
+
+        if(Physics.Raycast(ray, out hitInfo, float.MaxValue, 1 << LayerMask.NameToLayer("Ground")))
+        {
+            // 움직일 수 있는 상태로 바꾸자
+            canMove = true;
+
+            // Player 이동해야하 는 방향을 구하자(검출된 위치에서 - 플레이어의 위치)
+            movDir = hitInfo.point - transform.position; // 이렇게 벡터에서 뺄 수 있구나 상기시키기 알고 있었음
+
+
+            // 움직이여야 하는 거리를 셋팅
+            moveDist = movDir.magnitude;
+
+            // dir 크기를 Normalize 하자.
+            movDir.Normalize();
+
+            // print("클릭된 물체 이름:" + hitInfo.transform.name); // 역으로 하는 거 
+            // print("클릭 된 곳에 3D 좌표" + hitInfo.point);
+        }
+    }
+
+    void WASD_Move()
     {
         // W, A, S, D 키로 앞, 뒤, 왼, 오른 으로 움직이게 하자.
         // 1. 사용자의 입력을 받자 (W, A, S, D 키 입력)
@@ -58,8 +132,8 @@ public class PlayerMove : MonoBehaviour
         if (Input.GetButtonDown("Jump"))
         {
             // 만약에 현재 점프 횟수가 최대 점프 횟수 보다 작으면 
-            if(jumpCurrCnt < jumpMaxCnt)
-            { 
+            if (jumpCurrCnt < jumpMaxCnt)
+            {
                 // yVelocity에 jumpPower를 셋팅
                 yVelocity = jumpPower;
                 // 현재 점프 횟수를 증가 시키자.
