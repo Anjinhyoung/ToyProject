@@ -68,6 +68,16 @@ public class PlayerFire : MonoBehaviour
             // 반사각 구하자.
             Vector3 outDirection = Vector3.Reflect(ray.direction, hitInfo.normal);
 
+            // 만약에 총에 맞은 오브젝트가 Enemy라면
+            if(hitInfo.transform.gameObject.layer == LayerMask.NameToLayer("Enemy"))
+            {
+                // Enemy 컴포넌트 가져오자.
+                Enemy enemy = hitInfo.transform.GetComponent<Enemy>();
+                // 가져온 컴포넌트의 OnDamaged 함수를 실행
+                enemy.OnDamaged(); 
+            }
+
+
             // 부딪힌 오브젝트의 이름과 부딪힌 위치를 출력해보자.
             // print(hitInfo.transform.name + "," + hitInfo.transform.position);
             // print(hitInfo.transform.name + "," + hitInfo.point);

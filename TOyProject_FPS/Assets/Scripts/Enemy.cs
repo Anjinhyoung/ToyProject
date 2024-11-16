@@ -58,6 +58,7 @@ public class Enemy : MonoBehaviour
                 break;
 
             case EEnemyState.DAMAGE:
+                UpdateDamage();
                 break;
 
             case EEnemyState.DIE:
@@ -95,7 +96,6 @@ public class Enemy : MonoBehaviour
         {
             // MOVE 상태로 전환
             ChangeState(EEnemyState.MOVE);
-
         }
 
     }
@@ -163,5 +163,45 @@ public class Enemy : MonoBehaviour
                 ChangeState(EEnemyState.IDLE);
             }
         }
+    }
+
+    // 피격 대기 시간
+    public float damageDelay = 1;
+    void UpdateDamage()
+    {
+        // 피격 시간만큼 기다렸다가 
+        currTime += Time.deltaTime;
+        if(currTime > damageDelay)
+        {
+            // 나의 행동을 결정하자.
+            // 만약에 Player와 거리가 attackRange 보다 작으면 
+            float dist = Vector3.Distance(player.transform.position, transform.position);
+            if (dist < attackRange)
+            {
+                // 공격 상태로 전환
+                ChangeState(EEnemyState.ATTACK);
+            }
+
+            // 그렇지 않고 인지범위 보다 작으면   
+            else if (dist < traceRange)
+            {
+                // 이동 상태로 전환
+                ChangeState(EEnemyState.MOVE);
+            }
+
+            // 그렇지 않고 인지범위 보다 크면
+            else
+            {
+                // 대기상태로 전환
+                ChangeState(EEnemyState.IDLE);
+            }
+        }
+
+    }
+
+    public void OnDamaged()
+    {
+        // 상태를 Damage로 전환
+        ChangeState(EEnemyState.DAMAGE);
     }
 }
