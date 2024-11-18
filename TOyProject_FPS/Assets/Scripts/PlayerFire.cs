@@ -19,11 +19,14 @@ public class PlayerFire : MonoBehaviour
 
     void Start()
     {
-        
     }
 
     void Update()
     {
+
+
+
+
         // 1번키를 누르면
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {

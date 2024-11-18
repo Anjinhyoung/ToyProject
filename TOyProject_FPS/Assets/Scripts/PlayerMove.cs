@@ -38,6 +38,12 @@ public class PlayerMove : MonoBehaviour
     {
         // 캐릭터 컨트롤러  가져오자
         cc = GetComponent<CharacterController>();
+
+
+        // HpSystem을 가져오자.
+        HpSystem hpSystem = GetComponent<HpSystem>();
+        // 가져온 컴포넌트에서  die 함수를 등록
+        hpSystem.onDie = Die;
     }
     void Update()
     {
@@ -150,5 +156,13 @@ public class PlayerMove : MonoBehaviour
         // 3. 그 방향으로 움직이자. (P = P0 + vt)
         // transform.position += dir * moveSpeed * Time.deltaTime;
         cc.Move(dir * moveSpeed * Time.deltaTime);  // 이렇게 해야 충돌처리가 난다.
+    }
+
+    public GameObject model;
+
+     public void Die()
+    {
+        // Model 게임 오브젝트를 비활성화
+        model.SetActive(false);
     }
 }

@@ -35,10 +35,17 @@ public class Enemy : MonoBehaviour
     // 공격 Delay 시간
     public float attackDelayTime = 2;
 
+
     void Start()
     {
         // 플레이어를 찾자
         player = GameObject.Find("Player");
+
+
+        // HpSystem을 가져오자.
+        HpSystem hpSystem = GetComponent<HpSystem>();
+        // 가져온 컴포넌트에서  ondie 함수를 등록
+        hpSystem.onDie = OnDie;
     }
 
     void Update()
@@ -62,12 +69,13 @@ public class Enemy : MonoBehaviour
                 break;
 
             case EEnemyState.DIE:
+                UpdateDie();
                 break;
         }
     }
 
     // 상태가 전활될 때 한 번만 실행하는 동작
-    void ChangeState(EEnemyState state)
+    public void ChangeState(EEnemyState state)
     {
         // 이전 상태 -> 현재 상태
         print(currState + "-------->" + state);
@@ -82,6 +90,20 @@ public class Enemy : MonoBehaviour
         {
             case EEnemyState.ATTACK:
                 currTime = attackDelayTime;
+                break;
+
+            case EEnemyState.DAMAGE:
+                {
+                    HpSystem hpSystem = GetComponent<HpSystem>();
+                    hpSystem.UpdateHP(-1);
+                }
+                break;
+
+            case EEnemyState.DIE:
+                {
+                    CapsuleCollider coll = GetComponent<CapsuleCollider>();
+                    coll.enabled = false;
+                }
                 break;
         }
     }
@@ -144,6 +166,9 @@ public class Enemy : MonoBehaviour
             {
                 // 플레이어를 공격하자.
                 print("공격! 공격!");
+                // 플레이어 HP 줄이자
+                HpSystem hpSystem = player.GetComponent<HpSystem>();
+                hpSystem.UpdateHP(-2);
                 // 현재 시간   초기화
                 currTime = 0;
 
@@ -199,9 +224,28 @@ public class Enemy : MonoBehaviour
 
     }
 
+    void OnDie()
+    {
+        ChangeState(EEnemyState.DIE);
+    }
+
     public void OnDamaged()
     {
         // 상태를 Damage로 전환
         ChangeState(EEnemyState.DAMAGE);
+    }
+
+    // 내려가는  속력
+    public float downSpeed = 3;
+    // 내려가는 동안 기다려야 하는 시간
+
+    public float dieDelayTime = 2;
+
+    void UpdateDie()
+    {
+        // 밑으로 내려가자.
+        transform.position += Vector3.down * downSpeed * Time.deltaTime;
+        // 2초 뒤에 파괴하자.
+        Destroy(gameObject, dieDelayTime);
     }
 }
