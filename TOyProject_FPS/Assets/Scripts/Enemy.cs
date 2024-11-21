@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
+using UnityEngine.UI;
 
 public class Enemy : MonoBehaviour
 {
@@ -31,6 +33,9 @@ public class Enemy : MonoBehaviour
     // 공격 범위
     public float attackRange = 2;
 
+    // 시야각
+    public float viewAngle = 45;
+
     // 현재 시간
     float currTime;
 
@@ -40,7 +45,8 @@ public class Enemy : MonoBehaviour
     // Animator
     Animator anim;
 
-
+    // Nav Mesh Agent
+    NavMeshAgent nav;
 
     void Start()
     {
@@ -50,11 +56,18 @@ public class Enemy : MonoBehaviour
         // 자식에 있는 Animator 찾아오자.
         anim = GetComponentInChildren<Animator>();
 
+        // Nav Mesh Agent 컴포넌트 가져오자
+        nav = GetComponent<NavMeshAgent>();
+        nav.speed = moveSpeed;
 
         // HpSystem을 가져오자.
         HpSystem hpSystem = GetComponent<HpSystem>();
         // 가져온 컴포넌트에서  ondie 함수를 등록
         hpSystem.onDie = OnDie;
+
+        // viewAngle 값을 radian 으로 변경 후 cos 값으로 변경 
+        viewAngle = viewAngle * Mathf.Deg2Rad;
+        viewAngle = Mathf.Cos(viewAngle);
     }
 
     void Update()
@@ -100,6 +113,8 @@ public class Enemy : MonoBehaviour
         // 현재 시간을 초기화 
         currTime = 0;
 
+        // 길찾기 이동하는 것 멈춰
+        nav.isStopped = true;
 
         switch (currState)
         {
@@ -111,6 +126,7 @@ public class Enemy : MonoBehaviour
                 // 현재 상태의 Animation을 실행
                 // animator 에게 현재 상태의 Trigger를 발생
                 anim.SetTrigger(currState.ToString());
+                nav.isStopped = false;
                 break;
 
             case EEnemyState.ATTACK:
@@ -145,8 +161,26 @@ public class Enemy : MonoBehaviour
         // 만약에 그 거리가 인지범위 보다 작으면
         if(dist < traceRange)
         {
-            // MOVE 상태로 전환
-            ChangeState(EEnemyState.MOVE);
+            // 나의 앞방향과 Player를 향하는 방향 각도를 구하자
+            // 두 벡터의 사이각을 구하자
+            Vector3 toPlayer = player.transform.position - transform.position;
+            // 각도 = Arc cos (v1 과 v2 의 내적);
+            float dot = Vector3.Dot(transform.forward, toPlayer.normalized);
+            // 반환되는 각도는 radian 값이다.
+            float angle = (float)Math.Acos(dot);
+            // radian 각도를 degree로 바꾸자
+            angle = angle * Mathf.Rad2Deg; // 아래 Vector3.Angle 함수랑 같다.
+
+            // float angle = Vector3.Angle(transform.forward, player.transform.position - transform.position); // 벡터끼리 각도를 구할 수 있구나
+            print(angle);
+
+            // 만약에 그 각도가 나의 시야각보다 작으면
+            // if(angle < viewAngle)
+            if(dot > viewAngle)
+            {
+                // MOVE 상태로 전환
+                ChangeState(EEnemyState.MOVE);
+            }
         }
 
     }
@@ -173,14 +207,17 @@ public class Enemy : MonoBehaviour
         // 그렇지 않으면 
         else
         {
-            // Player를 향하는 방향 구하자
-            Vector3 dir = player.transform.position - transform.position;
-            dir.y = 0;
-            dir.Normalize(); // 단위 벡터라고 하며, 방향은 유지하면서 벡터의 크기(길이)는 1로 맞춰집니다
-            // 나의 앞방향을 dir로 하자.
-            transform.forward = dir; // 원래는 회전하고 뭐 해야 하는데 일단은 이렇게
-            // 그 방향으로 이동하자.
-            transform.position += dir * moveSpeed * Time.deltaTime; // 방향을 구한다 해도 초기 위치는 변하지 않는다
+            // 목적지로 이동
+            nav.SetDestination(player.transform.position);
+
+            //// Player를 향하는 방향 구하자
+            //Vector3 dir = player.transform.position - transform.position;
+            //dir.y = 0;
+            //dir.Normalize(); // 단위 벡터라고 하며, 방향은 유지하면서 벡터의 크기(길이)는 1로 맞춰집니다
+            //// 나의 앞방향을 dir로 하자.
+            //transform.forward = dir; // 원래는 회전하고 뭐 해야 하는데 일단은 이렇게
+            //// 그 방향으로 이동하자.
+            //transform.position += dir * moveSpeed * Time.deltaTime; // 방향을 구한다 해도 초기 위치는 변하지 않는다
         }
     }
 
