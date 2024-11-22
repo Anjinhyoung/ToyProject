@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 // delegate: 함수를 담을 수 있는 자료형
 
@@ -11,6 +12,10 @@ public class HpSystem : MonoBehaviour
     public float maxHP = 3;
     // 현재 HP
     float currHP;
+
+    // HPBar UI
+    public Image hpBar;
+
 
     // Hp가 0이 되었을 때 호출되는 함수를 담을 변수
     public Action onDie;
@@ -31,9 +36,12 @@ public class HpSystem : MonoBehaviour
     {
         // 현재 HP를 value 만큼 더하자
         currHP += value;
-        print(currHP);
+
+        // HPBar UI 갱신 (0 ~ 1)
+        hpBar.fillAmount = currHP / maxHP;
+
         // 만약에 현재 HP가 0보다 작거나 같으면
-        if(currHP <= 0)
+        if (currHP <= 0)
         {
             // onDie에 있는 함수를 실행하자.
             if(onDie != null)
