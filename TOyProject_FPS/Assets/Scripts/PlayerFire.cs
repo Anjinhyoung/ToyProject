@@ -21,9 +21,15 @@ public class PlayerFire : MonoBehaviour
     // Aim 모드인지 여부
     bool isAimMode;
 
+    // PlayerMove 컴포넌트
+    PlayerMove playerMove;
+
     void Start()
     {
         anim = GetComponentInChildren<Animator>();
+
+        // PlayerMove 가져오자.
+        playerMove = GetComponent<PlayerMove>();
 
         // 마우스 잠그자
         Cursor.lockState = CursorLockMode.Confined;
@@ -34,15 +40,20 @@ public class PlayerFire : MonoBehaviour
         // 마우스 왼쪽 버튼을 누르면 
         if (Input.GetMouseButtonDown(0))
         {
+            // 걷는 설정으로 !!
+            playerMove.SetWalkRun(false);
+
             FireRay();
         }
 
         // 마우스 오른쪽 버튼을 누르면
         if (Input.GetMouseButtonDown(1))
         {
+            playerMove.SetWalkRun(false);
+
             // Aim 모드 (animatior "Aim" 파라미터 값을 true)
             isAimMode = true;
-            anim.SetBool("Aim", true);
+            // anim.SetBool("Aim", true);
 
         }
         // 마우스 오른쪽 버튼을 떼면
@@ -50,8 +61,16 @@ public class PlayerFire : MonoBehaviour
         {
             // Aim 모드 해제 (animatior "Aim" 파라미터 값을 false)
             isAimMode = false;
-            anim.SetBool("Aim", false);
+            // anim.SetBool("Aim", false);
         }
+
+        // isAimMode에 따라서 animator의 Aiming 값을  변경
+        // isAimMode == true 이면 Aiming 값을 0 ---> 1 스르륵 변경
+        // isAimMode == false 이면 Aiming 값을 1 ---> 0 스르륵 변경
+        anim.SetFloat("Aiming", isAimMode ? 1 : 0, 0.25f * 0.3f, Time.deltaTime);
+        
+        // 움직임에 따라서 Idle <-> Walk 
+        anim.SetFloat("MoveMent", playerMove.isMoving ? 1 : 0, 0.25f * 0.3f, Time.deltaTime);
 
         // 2번키를 누르면
         if (Input.GetKeyDown(KeyCode.Alpha2))
@@ -74,17 +93,22 @@ public class PlayerFire : MonoBehaviour
 
     void FireRay()
     {
+        
         // Fire 총 애니 이름 설정
         string fireName = "Fire";
+
+        /*
         // Aim 모드면 총 애니 이름을 Aim_Fire 로
         if (isAimMode)
         {
             fireName = "Aim_Fire";
         }
+        
+        */
 
         // 총 쏘는 애니메이션 실행
         anim.CrossFade(fireName, 0.01f, 0, 0);
-
+        
         // 카메라 위치에서 카메라 앞방향으로 향하는 Ray를 만들자.
         Ray ray = new Ray(Camera.main.transform.position, Camera.main.transform.forward);
         // Ray를 발사해서 어딘가에 부딪혔다면

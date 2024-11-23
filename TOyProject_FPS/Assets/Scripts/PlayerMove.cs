@@ -7,7 +7,17 @@ using UnityEngine;
 
 public class PlayerMove : MonoBehaviour
 {
-    float moveSpeed = 5.0f;
+    // 이동 속력
+    float moveSpeed;
+
+    // 걷는 속력
+    public float walkSpeed = 5.0f;
+
+    // 뛰는 속력
+    public float runSpeed = 10.0f;
+
+    // 움직이고 있는지?
+    public bool isMoving;
 
     // 캐릭터 컨트롤러
     public CharacterController cc;
@@ -34,11 +44,19 @@ public class PlayerMove : MonoBehaviour
     // 움직이여야 하는 거리
     float moveDist;
 
+    // Animator 컴포넌트 
+    Animator anim;
+
     void Start()
     {
+        // 이동속력을 걷는 속력으로 설정
+        moveSpeed = walkSpeed;
+
         // 캐릭터 컨트롤러  가져오자
         cc = GetComponent<CharacterController>();
 
+        // Animator 가져오자
+        anim = GetComponentInChildren<Animator>();
 
         // HpSystem을 가져오자.
         HpSystem hpSystem = GetComponent<HpSystem>();
@@ -47,15 +65,10 @@ public class PlayerMove : MonoBehaviour
     }
     void Update()
     {
-
-
+        WalkRun();
 
          WASD_Move();
-
-
-        
-
-
+         
         /*
         Click_Move();
 
@@ -120,11 +133,11 @@ public class PlayerMove : MonoBehaviour
         Vector3 dirH = transform.right * h;
         Vector3 dirV = transform.forward * v;
         Vector3 dir = dirH + dirV;
+        // 움직이고 있는지 판별
+        isMoving = dir.sqrMagnitude > 0;
 
         // dir의 크기를 1로 만들자 (벡터의 정규화)
         dir.Normalize();
-
-
 
         // 만약에 땅에 있다면 yVelocity를 0으로 초기화 (이거 위치가 중요함 만약에 점프하고 난 뒤에 위치해 있으면 점프 명령을
         // 입력해도 캐릭터가 땅에 있는 동안 yVelocity가 0으로 즉시 초기화되기 때문에 점프가 일어나지 않거나 중력이 즉각적으로 다시 적용됩니다.)
@@ -158,8 +171,29 @@ public class PlayerMove : MonoBehaviour
         cc.Move(dir * moveSpeed * Time.deltaTime);  // 이렇게 해야 충돌처리가 난다.
     }
 
-    public GameObject model;
+    void WalkRun()
+    {
+        // 왼쪽 Shift 키를 누르면 
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            SetWalkRun(true);
+        }
+        // 왼쪽 Shift 키를 떼면 
+        if (Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            SetWalkRun(false);
+        }
+    }
 
+    public void SetWalkRun(bool isRun)
+    {
+        // isRun에 따라서 MoveSpeed 변경
+        moveSpeed = isRun ? runSpeed : walkSpeed;
+        // isRun에 따라서 애니메이션도 변경
+        anim.SetBool("Run", isRun);
+    }
+
+    public GameObject model;
      public void Die()
     {
         // Model 게임 오브젝트를 비활성화

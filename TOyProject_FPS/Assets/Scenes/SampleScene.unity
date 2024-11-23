@@ -1713,7 +1713,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHP: 3
-  hpBar: {fileID: 0}
+  hpBar: {fileID: 2022777973}
 --- !u!1 &1393151461
 GameObject:
   m_ObjectHideFlags: 0
@@ -2135,7 +2135,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 9100000, guid: 572c6a89beaa8874b8b8ed2e9c8a1266, type: 2}
+      objectReference: {fileID: 9100000, guid: 4c0a38208bafb3f4892e8342d91199c6, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
