@@ -47,6 +47,9 @@ public class PlayerMove : MonoBehaviour
     // Animator 컴포넌트 
     Animator anim;
 
+    // PlayerFire 컴포넌트
+    PlayerFire playerFire;
+
     void Start()
     {
         // 이동속력을 걷는 속력으로 설정
@@ -57,6 +60,9 @@ public class PlayerMove : MonoBehaviour
 
         // Animator 가져오자
         anim = GetComponentInChildren<Animator>();
+
+        // PlayerFire 가져오자
+        playerFire = GetComponent<PlayerFire>(); 
 
         // HpSystem을 가져오자.
         HpSystem hpSystem = GetComponent<HpSystem>();
@@ -173,6 +179,9 @@ public class PlayerMove : MonoBehaviour
 
     void WalkRun()
     {
+        // 장전 중이면 함수를 나가자.
+        if (playerFire.isReloading) return;
+
         // 왼쪽 Shift 키를 누르면 
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
