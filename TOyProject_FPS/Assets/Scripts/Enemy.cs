@@ -95,7 +95,7 @@ public class Enemy : MonoBehaviour
                 break;
 
             case EEnemyState.DIE:
-                //UpdateDie();
+                UpdateDie();
                 break;
         }
     }
@@ -132,6 +132,8 @@ public class Enemy : MonoBehaviour
             case EEnemyState.ATTACK:
                 // currTime = attackDelayTime; 원래는 기다렸다가 공격해야 하는데 바로  공격하게 코드를 바꿈
                 // anim.SetTrigger(currState.ToString());
+                StartCoroutine(Delay(attackDelayTime, 0));
+
                 break;
 
             case EEnemyState.DAMAGE:
@@ -139,6 +141,7 @@ public class Enemy : MonoBehaviour
                     HpSystem hpSystem = GetComponent<HpSystem>();
                     hpSystem.UpdateHP(-1);
                     anim.SetTrigger(currState.ToString());
+                    StartCoroutine(Delay(damageDelay, 0));
                 }
                 break;
 
@@ -148,6 +151,7 @@ public class Enemy : MonoBehaviour
                     coll.enabled = false;
 
                     anim.SetTrigger(currState.ToString());
+                    StartCoroutine(Delay(dieDelayTime, 1));
                 }
                 break;
         }
@@ -233,6 +237,26 @@ public class Enemy : MonoBehaviour
         ChangeState(EEnemyState.ATTACK_DELAY);
     }
 
+    void UpdateAttackDelay()
+    {
+
+    }
+    // type이 0 번일 때 DecideStateByDist 
+    // type이 1 번일 때 Destory(gameObject) 
+    IEnumerator Delay(float delayTime, int type)
+    {
+        yield return new WaitForSeconds(delayTime);
+        if(type == 0)
+        {
+            DecideStateByDist();
+        }
+
+        else if(type == 1)
+        {
+            Destroy(gameObject);
+        }
+    }
+
     public void RealAttack()
     {
         // 플레이어를 공격하자.
@@ -314,6 +338,23 @@ public class Enemy : MonoBehaviour
         // 밑으로 내려가자.
         transform.position += Vector3.down * downSpeed * Time.deltaTime;
         // 2초 뒤에 파괴하자.
-        Destroy(gameObject, dieDelayTime);
+        // Destroy(gameObject, dieDelayTime);
+    }
+
+    bool IsDelayComplete(float delayTime)
+    {
+        // 시간을 증가시키자
+        currTime += Time.deltaTime;
+        // 만약에 시간이 딜레이 타임보다 커지면
+        if(currTime >= delayTime)
+        {
+            // 현재 시간 초기화
+            currTime = 0;
+            // true 반환
+            return true;
+        }
+
+        // 그렇지 않으면
+        return false;
     }
 }
