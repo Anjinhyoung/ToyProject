@@ -132,7 +132,7 @@ public class Enemy : MonoBehaviour
             case EEnemyState.ATTACK:
                 // currTime = attackDelayTime; 원래는 기다렸다가 공격해야 하는데 바로  공격하게 코드를 바꿈
                 // anim.SetTrigger(currState.ToString());
-                StartCoroutine(Delay(attackDelayTime, 0));
+                StartCoroutine(Delay(attackDelayTime, () => { DecideStateByDist(); }, (float time) => { }));
 
                 break;
 
@@ -141,7 +141,7 @@ public class Enemy : MonoBehaviour
                     HpSystem hpSystem = GetComponent<HpSystem>();
                     hpSystem.UpdateHP(-1);
                     anim.SetTrigger(currState.ToString());
-                    StartCoroutine(Delay(damageDelay, 0));
+                    StartCoroutine(Delay(damageDelay,  () => { DecideStateByDist(); , (float time) => { }}));
                 }
                 break;
 
@@ -151,11 +151,13 @@ public class Enemy : MonoBehaviour
                     coll.enabled = false;
 
                     anim.SetTrigger(currState.ToString());
-                    StartCoroutine(Delay(dieDelayTime, 1));
+                    StartCoroutine(Delay(dieDelayTime, () => { Destroy(gameObject); }, (float time) => { }));
                 }
                 break;
         }
     }
+
+
 
     // 대기 상태일 때 계속 해야 하는 동작
     void UpdateIdle()
@@ -241,20 +243,13 @@ public class Enemy : MonoBehaviour
     {
 
     }
-    // type이 0 번일 때 DecideStateByDist 
-    // type이 1 번일 때 Destory(gameObject) 
-    IEnumerator Delay(float delayTime, int type)
+
+    IEnumerator Delay(float delayTime, Action onDelayComplete, Action<float> testDelegate)
     {
         yield return new WaitForSeconds(delayTime);
-        if(type == 0)
-        {
-            DecideStateByDist();
-        }
 
-        else if(type == 1)
-        {
-            Destroy(gameObject);
-        }
+        onDelayComplete();
+        testDelegate(delayTime);
     }
 
     public void RealAttack()
@@ -307,12 +302,17 @@ public class Enemy : MonoBehaviour
     public float damageDelay = 1;
     void UpdateDamage()
     {
+        
+        /*
+
         // 피격 시간만큼 기다렸다가 
         currTime += Time.deltaTime;
         if(currTime > damageDelay)
         {
             DecideStateByDist();
         }
+
+        */
 
     }
 
